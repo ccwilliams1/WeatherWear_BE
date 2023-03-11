@@ -1,0 +1,15 @@
+package rules
+ 
+import com.weatherwear.model.Weather
+rule "Chance of Rain > 60"
+	when 
+		weatherObject: Weather(chance_of_rain > 60)
+	then
+		weatherObject.callDB("SELECT * FROM closet");
+	end
+rule "Chance of Rain < 60"
+	when 
+		weatherObject: Weather(chance_of_rain < 60)
+	then
+		weatherObject.callDB("SELECT * FROM closet WHERE item_name != 'Raincoat'");
+	end
