@@ -13,9 +13,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weatherwear.model.Weather;
 import com.weatherwear.service.WeatherWearService;
 
+//This file creates a REST endpoint at /weather
 @RestController
 @CrossOrigin(origins = "*")
 public class WeatherController {
+	 //An object mapper is a java object that takes a JSON string and maps its contents to a Java object
 	  private final ObjectMapper objectMapper;
 	  private final WeatherWearService weatherService;
 
@@ -26,10 +28,15 @@ public class WeatherController {
 
 	    @CrossOrigin(origins = "*")
 	    @GetMapping("/weather")
+	    // The REST endpoint /weather has a parameter as a JSON string
 	    public String handleWeatherRequest(@RequestParam("data") String jsonString) throws Exception {
+	    	//When the parameter is received, a weather object is created of it's contents
+	    	//System.out.println("Hello");
+	    	
 	        Weather weather = objectMapper.readValue(jsonString, Weather.class);
-	        System.out.println("Temperature: " + weather.getHigh() + ", Condition: " + weather.getCondition());
 	    	System.out.println(jsonString);
+	    	//The rule engine is run using the newly created weather object
+	    	
 			weatherService.getOutfit(weather);
 
 	        return weather.getOutfitString();
