@@ -3,6 +3,7 @@ package com.weatherwear.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.weatherwear.model.Outfit;
 import com.weatherwear.model.Weather;
 import com.weatherwear.service.WeatherWearService;
 
@@ -29,7 +31,7 @@ public class WeatherController {
 	    @CrossOrigin(origins = "*")
 	    @GetMapping("/weather")
 	    // The REST endpoint /weather has a parameter as a JSON string
-	    public String handleWeatherRequest(@RequestParam("data") String jsonString) throws Exception {
+	    public ArrayList<Outfit> handleWeatherRequest(@RequestParam("data") String jsonString) throws Exception {
 	    	//When the parameter is received, a weather object is created of it's contents
 	    	//System.out.println("Hello");
 	    	
@@ -38,8 +40,9 @@ public class WeatherController {
 	    	//The rule engine is run using the newly created weather object
 	    	
 			weatherService.getOutfit(weather);
+			//System.out.println(weather.getOutfitList().size());
 
-	        return weather.getOutfitString();
+	        return weather.getOutfitList();
 	    }
 
 }

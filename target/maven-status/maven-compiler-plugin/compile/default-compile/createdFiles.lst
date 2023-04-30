@@ -1,2 +1,10 @@
-com/example/springec2/HelloController.class
-com/example/springec2/SpringEc2Application.class
+com/weatherwear/model/Garment.class
+com/weatherwear/WeatherWearSpring.class
+com/weatherwear/controller/WeatherController.class
+com/weatherwear/model/OutfitList.class
+com/weatherwear/service/WeatherWearService.class
+com/weatherwear/model/GarmentPairing.class
+com/weatherwear/model/ScoringSystem.class
+com/weatherwear/model/OutfitList$1.class
+com/weatherwear/model/Outfit.class
+com/weatherwear/model/Weather.class

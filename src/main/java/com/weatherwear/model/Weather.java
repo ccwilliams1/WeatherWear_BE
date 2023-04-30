@@ -1,8 +1,9 @@
 package com.weatherwear.model;
 
 import java.sql.*;
+import java.util.ArrayList;
 
-//Weather object
+//Weather object comprised of weather data from the API
 public class Weather {
 
 	private double chance_of_rain;
@@ -18,6 +19,7 @@ public class Weather {
 	private double average;
 	private String result;
 	private String outfitString;
+	private ArrayList<Outfit> outfitList;
 	
 	private int outerwear = 1;
 	
@@ -128,6 +130,14 @@ public class Weather {
 	
 	public String getOutfitString() {
 		return this.outfitString;
+	}
+	
+	public ArrayList<Outfit> getOutfitList() {
+		return this.outfitList;
+	}
+	
+	public void setOutfitList(ArrayList<Outfit> outfitList) {
+		this.outfitList = outfitList;
 	}
 	
 	

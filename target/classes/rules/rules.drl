@@ -1,7 +1,9 @@
 package rules
  
 import com.weatherwear.model.Weather
-rule "Chance of Rain > 60"
+import com.weatherwear.model.OutfitList
+
+/*rule "Chance of Rain > 60"
 	when 
 		weatherObject: Weather(chance_of_rain > 60)
 	then
@@ -13,3 +15,333 @@ rule "Chance of Rain < 60"
 	then
 		weatherObject.callDB("SELECT * FROM closet WHERE item_name != 'Raincoat'");
 	end
+*/
+
+rule "1. High Temperature and Clear Condition"
+    when
+        weather : Weather( average > 80, condition matches ".*(Sunny|cloudy|Overcast|Cloudy).*" )
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwearQuery = "SELECT * FROM closet WHERE wardrobeid = '-5';";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('Button-down shirt','Hoodie','Long-sleeve','Sweater','Sweatshirt') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Cargo pants', 'Jeans', 'Chinos', 'Jeans', 'Khakis') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Stylish Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 1");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "2. High Temperature and Rainy Condition"
+    when
+        weather : Weather( average > 80, condition matches ".*rain.*" )
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Blazer','Denim Jacket', 'Leather Jacket','Parka','Peacoat', 'Puffer Jacket', 'Trench Coat', 'Vest') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('Button-down shirt','Hoodie','Long-sleeve','Sweater','Sweatshirt') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Cargo pants','Chinos', 'Jeans', 'Khakis') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Sandals','Rain Boots', 'Stylish Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 2");
+    System.out.println(selected_style);
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+
+rule "3. Temperature between 60 and 80 and clear condition"
+    when
+    	weather: Weather(average >= 60, average <= 80, condition matches ".*(Sunny|cloudy|Overcast|Cloudy}).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Blazer','Parka','Peacoat', 'Puffer Jacket', 'Trench Coat', 'Vest','Windbreaker', 'Raincoat') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('Hoodie','Long-sleeve','Sweater','Sweatshirt') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Nothing') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 3");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "4. Temperature between 60 and 80 and rainy"
+    when
+    	weather: Weather(average >= 60, average <= 80, condition matches ".*(rain).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Blazer','Parka','Peacoat', 'Puffer Jacket', 'Trench Coat', 'Vest') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('Hoodie','Long-sleeve','Sweater','Sweatshirt') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Nothing') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Winter Boots', 'Sandals') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 4");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "5. Temperature between 40°F and 60°F, clear Condition"
+    when
+    	weather: Weather(average >= 40, average <= 60, condition matches ".*(Sunny|cloudy|Overcast|Cloudy}).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Parka','Peacoat', 'Puffer Jacket', 'Raincoat') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('T-shirt', 'Polo shirt', 'Tank top') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Shorts') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 5");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "6. Temperature between 40°F and 60°F, rainy Condition"
+    when
+    	weather: Weather(average >= 40, average <= 60, condition matches ".*(rain).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Parka','Peacoat', 'Puffer Jacket') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('T-shirt', 'Polo shirt', 'Tank top') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Shorts') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 6");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "7. Temperature between 20°F and 40°F, non-clear"
+    when
+    	weather: Weather(average >= 20, average <= 40, condition matches "!.*(Sunny|cloudy|Overcast|Cloudy}).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Parka','Peacoat', 'Puffer Jacket') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('T-shirt', 'Polo shirt', 'Tank top') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Shorts') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 7");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "8. Temperature between 20°F and 40°F, Clear Condition"
+    when
+    	weather: Weather(average >= 20, average <= 40, condition matches ".*(Sunny|cloudy|Overcast|Cloudy}).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Parka','Peacoat', 'Puffer Jacket') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('T-shirt', 'Polo shirt', 'Tank top') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Shorts') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 8");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "9. Temperature below 20 and non-precipitating"
+    when
+    	weather: Weather(average <= 20, condition matches ".*(Sunny|cloudy|Overcast|Cloudy}).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Parka','Peacoat', 'Puffer Jacket') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('T-shirt', 'Polo shirt', 'Tank top') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Shorts') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 9");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+rule "19. Temperature below 20 non-clear Condition"
+    when
+    	weather: Weather(average <= 20, condition matches "!.*(Sunny|cloudy|Overcast|Cloudy}).*")
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+    
+    //No outerwear
+    String outerwear = "SELECT * FROM closet WHERE item_type = 'Outerwear' AND (item_subtype NOT IN ('Parka','Peacoat', 'Puffer Jacket', 'Windbreaker') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String outerwearQuery = outerwear + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-9','-10') AND item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + outerwear + ");";
+    
+    //Short sleeve shirts
+    String shirts = "SELECT * FROM closet WHERE item_type = 'Shirt' AND (item_subtype NOT IN ('T-shirt', 'Polo shirt', 'Tank top') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shirtQuery = shirts + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-1','-6') AND item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shirts + ");";
+    
+    //Short pants
+    String pants = "SELECT * FROM closet WHERE item_type = 'Pants' AND (item_subtype NOT IN ('Shorts') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String pantsQuery = pants + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-2','-7') AND item_type = 'Pants' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + pants + ");";
+    
+    //Loose shoes
+    String shoes = "SELECT * FROM closet WHERE item_type = 'Shoes' AND (item_subtype NOT IN ('Rain Boots', 'Winter Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "')";
+    String shoesQuery = shoes + " UNION ALL SELECT * FROM closet WHERE wardrobeid IN ('-3','-4','-8') AND item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND NOT EXISTS (" + shoes + ");";
+    
+
+    // Execute the SQL query and return the results to the front-end
+    System.out.println("Rule 10");
+    // Execute the query and process the results
+    OutfitList ol = new OutfitList();
+    ol.buildList(outerwearQuery, shirtQuery, pantsQuery, shoesQuery);
+    weather.setOutfitList(ol.getValidFits());
+        
+end
+
+
+
+
+
+
+

@@ -1,2 +1,9 @@
-/Users/calebwilliams/Desktop/Telmeppo/spring-ec2/src/main/java/com/example/springec2/SpringEc2Application.java
-/Users/calebwilliams/Desktop/Telmeppo/spring-ec2/src/main/java/com/example/springec2/HelloController.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/model/OutfitList.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/model/Garment.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/controller/WeatherController.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/WeatherWearSpring.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/model/ScoringSystem.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/service/WeatherWearService.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/model/GarmentPairing.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/model/Weather.java
+/Users/calebwilliams/Projects/eclipse-workspace/WeatherWear_BE/src/main/java/com/weatherwear/model/Outfit.java
