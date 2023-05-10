@@ -1,0 +1,178 @@
+package rules
+ 
+import com.weatherwear.model.Weather
+/*rule "Chance of Rain > 60"
+	when 
+		weatherObject: Weather(chance_of_rain > 60)
+	then
+		weatherObject.callDB("SELECT * FROM closet");
+	end
+rule "Chance of Rain < 60"
+	when 
+		weatherObject: Weather(chance_of_rain < 60)
+	then
+		weatherObject.callDB("SELECT * FROM closet WHERE item_name != 'Raincoat'");
+	end
+*/
+rule "1. High Temperature and Clear Condition"
+    when
+        weather : Weather( average > 80, condition matches ".*(sunny|cloudy|overcast).*" )
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+        String sqlQuery = "(SELECT * FROM closet " +
+                          "WHERE item_type = 'Shirt' AND item_subtype IN ('T-shirt', 'Polo Shirt') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1) " +
+                          "UNION ALL " +
+                          "(SELECT * FROM closet " +
+                          "WHERE item_type = 'Pants' AND item_subtype = 'Shorts' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1) " +
+                          "UNION ALL " +
+                          "(SELECT * FROM closet " +
+                          "WHERE item_type = 'Shoes' AND item_subtype IN ('Sandals', 'Sneakers') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1);";
+
+        // Execute the SQL query and return the results to the front-end
+    weather.setOuterwear(0);
+    System.out.println("Rule 1");
+    weather.callDB(sqlQuery);
+        
+end
+
+rule "2 High Temperature and Rainy Condition"
+    when
+        weather : Weather( average > 80, condition matches ".*rain.*" )
+        selected_style : String() from weather.style
+        user_email : String() from weather.userEmail
+    then
+        String sqlQuery = "(SELECT wardrobeid FROM closet " +
+                          "WHERE item_type = 'Outerwear' AND item_subtype IN ('Windbreaker', 'Raincoat', 'Bomber Jacket') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1) " +
+                          "UNION ALL " +
+                          "(SELECT wardrobeid FROM closet " +
+                          "WHERE item_type = 'Shirt' AND item_subtype IN ('T-shirt', 'Polo shirt', 'Tank top', 'Blouse') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1) " +
+                          "UNION ALL " +
+                          "(SELECT wardrobeid FROM closet " +
+                          "WHERE item_type = 'Pants' AND item_subtype = 'Shorts' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1) " +
+                          "UNION ALL " +
+                          "(SELECT wardrobeid FROM closet " +
+                          "WHERE item_type = 'Shoes' AND item_subtype IN ('Sneakers', 'Boots') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1);";
+
+        // Execute the SQL query and return the results to the front-end
+    weather.setOuterwear(1);
+    System.out.println("Rule 2");    
+    weather.callDB(sqlQuery);
+end
+rule "3. Temperature between 60°F and 80°F, Sunny or Partly Cloudy or Overcast"
+when
+    weather: Weather(average >= 60, average <= 80, condition matches ".*(Sunny|cloudy|Overcast|Cloudy}).*")
+    selected_style : String() from weather.style
+    user_email : String() from weather.userEmail
+then
+        String sqlQuery =
+        			//	  "(SELECT wardrobeid FROM closet " +
+                    //      "WHERE item_type = 'Outerwear' AND item_subtype IN ('Windbreaker', 'Raincoat', 'Bomber Jacket') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                    //      "ORDER BY RANDOM() " +
+                    //      "LIMIT 1) " +
+                    //      "UNION ALL " +
+                          "(SELECT wardrobeid FROM closet " +
+                          "WHERE item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1) " +
+                          "UNION ALL " +
+                          "(SELECT wardrobeid FROM closet " +
+                          "WHERE item_type = 'Pants' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1) " +
+                          "UNION ALL " +
+                          "(SELECT wardrobeid FROM closet " +
+                          "WHERE item_type = 'Shoes' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+                          "ORDER BY RANDOM() " +
+                          "LIMIT 1);";
+    // Execute the query and process the results
+    weather.setOuterwear(0);
+    System.out.println("Rule 3");
+    weather.callDB(sqlQuery);
+    
+end
+rule "4. Temperature between 60°F and 80°F, Rainy Condition"
+when
+    weather: Weather(average >= 60, average <= 80, condition matches ".*(rain).*")
+    selected_style : String() from weather.style
+    user_email : String() from weather.userEmail
+then
+    String sqlQuery =
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Outerwear' AND (item_subtype = 'Raincoat' OR item_subtype LIKE '%jacket%') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1) " +
+              "UNION ALL " +
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Shirt' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1) " +
+              "UNION ALL " +
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Pants' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1) " +
+              "UNION ALL " +
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Shoes' AND item_subtype <> 'Sandals' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1);";
+
+    // Execute the query and process the results
+    weather.setOuterwear(1);
+    System.out.println("Rule 4");
+    weather.callDB(sqlQuery);
+end
+rule "5. Temperature between 40°F and 60°F, Rainy Condition"
+when
+    weather: Weather(average >= 40, average <= 60, condition matches ".*(rain).*")
+    selected_style : String() from weather.style
+    user_email : String() from weather.userEmail
+then
+    String sqlQuery =
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Outerwear' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1) " +
+              "UNION ALL " +
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Shirt' AND item_subtype NOT IN ('T-shirt', 'Polo shirt', 'Tank top', 'Blouse') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1) " +
+              "UNION ALL " +
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Pants' AND item_subtype NOT IN ('Shorts') AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1) " +
+              "UNION ALL " +
+              "(SELECT wardrobeid FROM closet " +
+              "WHERE item_type = 'Shoes' AND item_subtype <> 'Sandals' AND dress_style = '" + selected_style + "' AND user_email = '" + user_email + "' " +
+              "ORDER BY RANDOM() " +
+              "LIMIT 1);";
+
+    // Execute the query and process the results
+    System.out.println("Rule 5");
+    weather.setOuterwear(1);
+    weather.callDB(sqlQuery);
+end
+
+
+
+
+
+
+
